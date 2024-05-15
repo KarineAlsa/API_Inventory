@@ -1,16 +1,16 @@
 from ProductManagement.Domain.Entity.Product import Product
 from ProductManagement.Infrastructure.Repository.InventoryMySQLRepository import ProductMysqlRepository
 
-class CreateProductUseCase:
+class ListAllProductsUseCase:
     def __init__(self):
         self.repository = ProductMysqlRepository()
 
-    async def run(self, Name: str, Price: float, Stock: int):
+    async def run(self):
         
         try:
-            product = Product(Name=Name, Price=Price, Stock=Stock)
             
-            return await self.repository.create_product(product)
+            product = await self.repository.list_all()
+            return {"data": product, "message": "Productos obtenidos", "success": True}
         
         except Exception as error:
             print(f"An error occurred: {error}")

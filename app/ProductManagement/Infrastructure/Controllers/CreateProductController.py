@@ -2,7 +2,7 @@ from fastapi import FastAPI, HTTPException, Request
 from pydantic import BaseModel
 from datetime import datetime
 from typing import Any
-from app.ProductManagement.Application.UseCases.CreateProductUseCase import CreateProductUseCase
+from ProductManagement.Application.UseCases.CreateProductUseCase import CreateProductUseCase
 
 app = FastAPI()
 
@@ -12,14 +12,15 @@ class ProductRequest(BaseModel):
     Stock: int
 
 class CreateProductController:
-    def __init__(self, use_case: CreateProductUseCase):
-        self.use_case = use_case
+    def __init__(self):
+        self.use_case = CreateProductUseCase()
 
     async def run(self, request: ProductRequest):
         Name = request.Name
         Price = request.Price
         Stock = request.Stock
-
+        
+        
         if not Name or not Price or not Stock:
             raise HTTPException(status_code=400, detail="Debe completar todos los campos.")
 
@@ -28,7 +29,9 @@ class CreateProductController:
         
 
         try:
+            
             product = await self.use_case.run(Name, Price, Stock)
+            
             if product:
                 return {"data": product, "message": "Producto creado", "success": True}
             else:

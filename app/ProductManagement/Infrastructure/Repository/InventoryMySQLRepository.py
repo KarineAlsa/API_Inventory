@@ -1,12 +1,12 @@
 import aiomysql
 import asyncio
-import app.ProductManagement.Domain.Entity.Product as Product
-from app.database.connection import create_connection as connect
+import ProductManagement.Domain.Entity.Product as Product
+from database.connection import create_connection as connect
 import mysql.connector
 
 class ProductMysqlRepository:
-    def __init__(self, pool):
-        self.pool = pool
+    def __init__(self):
+        self.pool = None
 
     async def create_product(self, product: Product) -> dict:
         sql = "INSERT INTO Products (Name, Price, Stock) VALUES (%s, %s, %s)"
@@ -15,25 +15,63 @@ class ProductMysqlRepository:
         cursor = await db_connection.cursor()
         if db_connection:
             async with db_connection.cursor() as cursor:
+                
                 await cursor.execute(sql, params)
                 await db_connection.commit()
-                producto = Product(product.Name, product.Price, product.Stock)
+                
                 await cursor.close()
 
             
-            return producto
+            return {
+                "Name": product.Name,
+                "Price": product.Price,
+                "Stock": product.Stock
+            }
            
         else:
             raise Exception("Error al insertar la orden en la base de datos")
 
     async def list_all(self) -> list:
-        sql = "SELECT * FROM products"
-        async with self.pool.acquire() as conn:
-            async with conn.cursor(aiomysql.DictCursor) as cur:
-                await cur.execute(sql)
-                result = await cur.fetchall()
+        sql = "SELECT * FROM Products"
+        
+        db_connection = await connect()
+        cursor = await db_connection.cursor()
+        
+        if db_connection:
+            async with db_connection.cursor() as cursor:
+                await cursor.execute(sql)
+                await db_connection.commit()
+                result = await cursor.fetchall()
                 if result:
-                    return result
+                    products = []
+                    for row in result:
+                        product_dict = {
+                            "Id": row[0],
+                            "Name": row[1],
+                            "Price": row[2],
+                            "Stock": row[3]
+                        }
+                        products.append(product_dict)
+                    return products
                 else:
                     return "No hay órdenes en la base de datos"
+        else:
+            raise Exception("Error al conectar con la base de datos")
+        
+    async def delete(self,id: any):
+        sql = "DELETE FROM Products WHERE id = %s;"
+        params = (id)
+        db_connection = await connect()
+        cursor = await db_connection.cursor()
+        
+        if db_connection:
+            async with db_connection.cursor() as cursor:
+                await cursor.execute(sql, params)
+                await db_connection.commit()
+                
+                await cursor.close()
+                return True
+        
+        else:
+            raise Exception("Error al conectar con la base de datos")
 

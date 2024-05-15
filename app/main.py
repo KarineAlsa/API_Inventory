@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from .database import connection
-from .ProductManagement.Infrastructure.Routes import route 
+from database import connection
+from ProductManagement.Infrastructure.Routes.ProductRoutes import route 
 from dotenv import load_dotenv
 load_dotenv()
 import uvicorn

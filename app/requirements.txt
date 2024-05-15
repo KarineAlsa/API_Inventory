@@ -1,0 +1,10 @@
+fastapi
+uvicorn
+mysql-connector-python
+pyjwt
+pydantic
+python-dotenv
+tabulate
+aiomysql
+reportlab
+matplotlib

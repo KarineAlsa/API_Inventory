@@ -1,0 +1,10 @@
+from .ProductManagement.Application.UseCases.CreateProductUseCase import CreateProductUseCase
+
+from .ProductManagement.Infrastructure.Repository.InventoryMySQLRepository import InventoryMySQLRepository
+
+from .ProductManagement.Infrastructure.Controllers.CreateProductController import CreateProductController
+
+create_order_case = CreateProductUseCase(InventoryMySQLRepository)
+
+create_order_controller = CreateProductController(create_order_case)
+

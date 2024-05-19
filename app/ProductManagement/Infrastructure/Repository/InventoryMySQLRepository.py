@@ -2,6 +2,7 @@ import aiomysql
 import asyncio
 import ProductManagement.Domain.Entity.Product as Product
 from database.connection import create_connection as connect
+from database.connection import create_connection_sync as connect_sync
 import mysql.connector
 
 class ProductMysqlRepository:
@@ -21,7 +22,6 @@ class ProductMysqlRepository:
                 
                 await cursor.close()
 
-            
             return {
                 "Name": product.Name,
                 "Price": product.Price,
@@ -74,4 +74,38 @@ class ProductMysqlRepository:
         
         else:
             raise Exception("Error al conectar con la base de datos")
-
+        
+    def update_stock(self, products: any):
+        db_connection = connect_sync()
+        
+        if db_connection:
+            with db_connection.cursor() as cursor:
+                for product in products:
+                    product_id = int(product['product_id'])
+                    quantity_sold = int(product['total_quantity'])
+              
+                    current_stock = self.get_stock(product_id, db_connection)
+      
+                    new_stock = current_stock - quantity_sold
+                    
+                    sql = "UPDATE Products SET Stock = %s WHERE id = %s;"
+                    params = (new_stock, product_id)
+                    cursor.execute(sql, params)
+                
+                db_connection.commit()
+                cursor.close()
+                return True
+        else:
+            raise Exception("Error al conectar con la base de datos")
+    
+    def get_stock(self, id: int, db_connection):
+        sql = "SELECT Stock FROM Products WHERE id = %s;"
+        params = (id)
+        
+        with db_connection.cursor() as cursor:
+            cursor.execute(sql, params)
+            result = cursor.fetchone()
+            if result:
+                return result[0]
+            else:
+                raise Exception(f"No se encontró el producto con id {id}")

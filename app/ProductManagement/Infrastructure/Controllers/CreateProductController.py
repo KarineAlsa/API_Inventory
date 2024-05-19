@@ -20,7 +20,6 @@ class CreateProductController:
         Price = request.Price
         Stock = request.Stock
         
-        
         if not Name or not Price or not Stock:
             raise HTTPException(status_code=400, detail="Debe completar todos los campos.")
 
